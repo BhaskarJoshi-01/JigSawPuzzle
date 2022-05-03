@@ -36,12 +36,12 @@ class ImageData(Dataset):
 
         img = Image.open(image_name).convert('RGB')
 
-        # img.save("original.jpeg")
+        img.save("original.jpeg")
 
         if img.size[0] != 255:
             img = self.__image_transformer(img)
         
-        # img.save("cropped.jpeg")
+        img.save("cropped.jpeg")
 
 
         s = float(img.size[0]) // 3
@@ -60,7 +60,7 @@ class ImageData(Dataset):
             m, s = tile.view(3, -1).mean(dim=1).numpy(), tile.view(3, -1).std(dim=1).numpy()
             s[s == 0] = 1
             norm = T.Normalize(mean=m.tolist(), std=s.tolist())
-            tile = norm(tile)
+            # tile = norm(tile)
             tiles[n] = tile
             
 
@@ -92,8 +92,28 @@ class ImageData(Dataset):
         return im.astype('uint8')
 
 
+import matplotlib.pyplot as plt
+if __name__ == '__main__':
+    data_path = 'data/ILSVRC2012_img_train'
+    dataset = ImageData(data_path)
+    permuted,order,original  = dataset[0]
+    print("Dataset Permutation : ",dataset.permutations[order])
+    transform=T.ToPILImage()
+    f, ax = plt.subplots(3, 3)
+    for i,tile in enumerate(original):
+        tile=transform(tile)
+        ax[i//3][i%3].imshow(tile)
+        # tile.save(f"original{i}.jpeg")
+    plt.savefig("orig.jpeg")
 
-# if __name__ == '__main__':
-#     data_path = '/home2/bhaskar.joshi/cv/JigsawPuzzlePytorch/data/ILSVRC2012_img_val'
-#     dataset = DataLoader(data_path)
-#     # print(dataset.__getitem__(1))
+    f, ax = plt.subplots(3, 3)
+    for i,tile in enumerate(permuted):
+        tile=transform(tile)
+        ax[i//3][i%3].imshow(tile)
+        # tile.save(f"permuted{i}.jpeg")
+    plt.savefig("perm.jpeg")
+    
+
+
+
+
